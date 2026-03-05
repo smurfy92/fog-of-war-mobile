@@ -11,16 +11,43 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Map Explorer to track your location to reveal the map as you explore.",
+          "locationAlwaysPermission": "Allow Map Explorer to track your location in the background to continue revealing the map.",
+          "locationWhenInUsePermission": "Allow Map Explorer to access your location to reveal the map.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fogofwar.explorer",
+      "infoPlist": {
+        "UIBackgroundModes": ["location"],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location to reveal the map as you explore, even when the app is in the background.",
+        "NSLocationWhenInUseUsageDescription": "We need your location to reveal the map as you explore."
+      }
     },
     "android": {
+      "package": "com.fogofwar.explorer",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
