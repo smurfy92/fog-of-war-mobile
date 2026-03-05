@@ -1,4 +1,4 @@
-import { MMKV } from 'react-native-mmkv';
+import { createMMKV } from 'react-native-mmkv';
 import { STORAGE_KEYS, MAX_POSITION_HISTORY } from '../utils/constants';
 import {
   calculateAffectedCells,
@@ -13,7 +13,7 @@ import type {
 } from '../types/location';
 
 // Initialize MMKV storage
-const storage = new MMKV({
+const storage = createMMKV({
   id: 'fog-of-war-storage',
 });
 
@@ -185,14 +185,43 @@ export function getExplorationStats(): ExplorationStats {
  */
 export function clearExplorationData(): void {
   try {
-    storage.delete(STORAGE_KEYS.EXPLORED_CELLS);
-    storage.delete(STORAGE_KEYS.POSITION_HISTORY);
-    storage.delete(STORAGE_KEYS.EXPLORATION_BOUNDS);
-    storage.delete(STORAGE_KEYS.LAST_POSITION);
+    storage.remove(STORAGE_KEYS.EXPLORED_CELLS);
+    storage.remove(STORAGE_KEYS.POSITION_HISTORY);
+    storage.remove(STORAGE_KEYS.EXPLORATION_BOUNDS);
+    storage.remove(STORAGE_KEYS.LAST_POSITION);
     console.log('[Storage] All exploration data cleared');
   } catch (error) {
     console.error('[Storage] Error clearing data:', error);
   }
+}
+
+/**
+ * Auth token persistence
+ */
+export function saveAuthToken(token: string): void {
+  storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
+}
+
+export function getAuthToken(): string | null {
+  return storage.getString(STORAGE_KEYS.AUTH_TOKEN) ?? null;
+}
+
+export function saveAuthUser(user: { id: string; email: string }): void {
+  storage.set(STORAGE_KEYS.AUTH_USER, JSON.stringify(user));
+}
+
+export function getAuthUser(): { id: string; email: string } | null {
+  try {
+    const json = storage.getString(STORAGE_KEYS.AUTH_USER);
+    return json ? JSON.parse(json) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearAuthData(): void {
+  storage.remove(STORAGE_KEYS.AUTH_TOKEN);
+  storage.remove(STORAGE_KEYS.AUTH_USER);
 }
 
 /**

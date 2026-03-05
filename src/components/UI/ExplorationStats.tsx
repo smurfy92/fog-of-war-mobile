@@ -1,15 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useExplorationStore } from '../../stores/explorationStore';
+import { useAuthStore } from '../../stores/authStore';
 
 interface ExplorationStatsProps {
   onClearData?: () => void;
+  onAuthPress?: () => void;
 }
 
-export const ExplorationStats: React.FC<ExplorationStatsProps> = ({ onClearData }) => {
+export const ExplorationStats: React.FC<ExplorationStatsProps> = ({ onClearData, onAuthPress }) => {
   const stats = useExplorationStore((state) => state.stats);
   const isTracking = useExplorationStore((state) => state.isTracking);
+  const isSyncing = useExplorationStore((state) => state.isSyncing);
   const setTracking = useExplorationStore((state) => state.setTracking);
+  const user = useAuthStore((state) => state.user);
 
   const formatArea = (sqMeters: number): string => {
     if (sqMeters < 1000) {
@@ -23,6 +27,17 @@ export const ExplorationStats: React.FC<ExplorationStatsProps> = ({ onClearData 
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.authRow} onPress={onAuthPress}>
+        {isSyncing ? (
+          <ActivityIndicator size="small" color="#4CAF50" style={styles.syncIcon} />
+        ) : (
+          <Text style={styles.syncIcon}>{user ? '☁️' : '🔒'}</Text>
+        )}
+        <Text style={[styles.authText, user && styles.authTextActive]}>
+          {user ? user.email : 'Sign in to sync'}
+        </Text>
+      </TouchableOpacity>
+
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text style={styles.statValue}>{stats.totalCells}</Text>
@@ -68,6 +83,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  authRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  syncIcon: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  authText: {
+    fontSize: 12,
+    color: '#999',
+    flex: 1,
+  },
+  authTextActive: {
+    color: '#4CAF50',
+    fontWeight: '500',
   },
   statsRow: {
     flexDirection: 'row',

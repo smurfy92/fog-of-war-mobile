@@ -1,5 +1,5 @@
 {
-  "name": "fog-of-war-explorer",
+  "name": "fog-of-war",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
@@ -16,12 +16,14 @@
     "expo-status-bar": "~55.0.4",
     "expo-task-manager": "~55.0.9",
     "geolib": "^3.3.4",
+    "nativewind": "^4.2.2",
     "react": "19.2.0",
     "react-native": "0.83.2",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-maps": "^1.26.20",
     "react-native-mmkv": "^4.1.2",
     "react-native-reanimated": "4.2.1",
+    "tailwindcss": "^3.4.19",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

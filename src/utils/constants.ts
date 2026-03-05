@@ -18,7 +18,14 @@ export const STORAGE_KEYS = {
   LAST_POSITION: 'last_position',
   STATS: 'exploration_stats',
   TRACKING_ENABLED: 'tracking_enabled',
+  AUTH_TOKEN: 'auth_token',
+  AUTH_USER: 'auth_user',
 } as const;
+
+// API Configuration
+// For iOS simulator use localhost. For Android emulator use 10.0.2.2.
+// For a physical device, replace with your machine's local IP address.
+export const API_BASE_URL = 'http://localhost:3000/api';
 
 // Map Configuration
 export const DEFAULT_MAP_REGION = {

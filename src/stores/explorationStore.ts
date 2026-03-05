@@ -9,6 +9,7 @@ import {
   setTrackingEnabled,
   type ExplorationStats,
 } from '../services/storageService';
+import { pushPositions, pullPositions, deleteRemotePositions } from '../services/syncService';
 import { isSignificantMovement } from '../utils/geoUtils';
 import { MIN_DISTANCE_BETWEEN_UPDATES, MAX_GPS_ACCURACY } from '../utils/constants';
 
@@ -23,7 +24,11 @@ interface ExplorationState {
   // UI State
   isLoading: boolean;
   isTracking: boolean;
+  isSyncing: boolean;
   stats: ExplorationStats;
+
+  // Sync
+  syncToken: string | null;
 
   // Actions
   loadData: () => void;
@@ -32,6 +37,8 @@ interface ExplorationState {
   clearData: () => void;
   refreshStats: () => void;
   setTracking: (enabled: boolean) => void;
+  setSyncToken: (token: string | null) => void;
+  pullFromBackend: (token: string) => Promise<void>;
 }
 
 export const useExplorationStore = create<ExplorationState>((set, get) => ({
@@ -43,6 +50,8 @@ export const useExplorationStore = create<ExplorationState>((set, get) => ({
   lastSavedPosition: null,
   isLoading: true,
   isTracking: isTrackingEnabled(),
+  isSyncing: false,
+  syncToken: null,
   stats: {
     totalPositions: 0,
     totalCells: 0,
@@ -135,6 +144,13 @@ export const useExplorationStore = create<ExplorationState>((set, get) => ({
     });
 
     console.log(`[Store] Added position: ${exploredArea.latitude.toFixed(6)}, ${exploredArea.longitude.toFixed(6)}`);
+
+    const { syncToken } = get();
+    if (syncToken) {
+      pushPositions([exploredArea], syncToken).catch((error: unknown) => {
+        console.warn('[Store] Failed to push position to backend:', error);
+      });
+    }
   },
 
   // Clear all exploration data
@@ -155,6 +171,13 @@ export const useExplorationStore = create<ExplorationState>((set, get) => ({
         },
       });
       console.log('[Store] All data cleared');
+
+      const { syncToken } = get();
+      if (syncToken) {
+        deleteRemotePositions(syncToken).catch((error: unknown) => {
+          console.warn('[Store] Failed to delete remote positions:', error);
+        });
+      }
     } catch (error) {
       console.error('[Store] Error clearing data:', error);
     }
@@ -171,5 +194,39 @@ export const useExplorationStore = create<ExplorationState>((set, get) => ({
     setTrackingEnabled(enabled);
     set({ isTracking: enabled });
     console.log(`[Store] Tracking ${enabled ? 'enabled' : 'disabled'}`);
+  },
+
+  setSyncToken: (token: string | null) => {
+    set({ syncToken: token });
+  },
+
+  pullFromBackend: async (token: string) => {
+    set({ isSyncing: true });
+    try {
+      const remotePositions = await pullPositions(token);
+      const { positions } = get();
+      const localTimestamps = new Set(positions.map((p) => p.timestamp));
+      const newPositions = remotePositions.filter((p) => !localTimestamps.has(p.timestamp));
+
+      for (const position of newPositions) {
+        saveExploredPosition(position);
+      }
+
+      if (newPositions.length > 0) {
+        const data = loadExplorationData();
+        const stats = getExplorationStats();
+        set({
+          exploredCells: data.exploredCells,
+          positions: data.positions,
+          bounds: data.bounds,
+          stats,
+        });
+        console.log(`[Store] Pulled ${newPositions.length} positions from backend`);
+      }
+    } catch (error) {
+      console.error('[Store] Error pulling from backend:', error);
+    } finally {
+      set({ isSyncing: false });
+    }
   },
 }));

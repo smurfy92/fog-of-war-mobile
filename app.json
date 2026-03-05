@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "fog-of-war-explorer",
-    "slug": "fog-of-war-explorer",
+    "name": "fog-of-war",
+    "slug": "fog-of-war",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
