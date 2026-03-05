@@ -218,7 +218,7 @@ Permissions are requested on first launch via the `PermissionGuard` component.
 ## Project Structure
 
 ```
-fog-of-war-explorer/
+mobile
 ├── src/
 │   ├── components/
 │   │   ├── Map/
